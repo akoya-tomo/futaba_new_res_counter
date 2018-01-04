@@ -13,7 +13,7 @@
 * 板名をタブに表示できます。（デフォルト：有効）  
 
 ## インストール
-[GreasyFork](https://greasyfork.org/ja/scripts/36235-futaba-new-res-counter)　
+[GreasyFork](https://greasyfork.org/ja/scripts/37021-futaba-new-res-counter)　
 [GitHub](https://github.com/akoya-tomo/futaba_new_res_counter/raw/master/futaba_new_res_counter.user.js)
 
 ## 設定
