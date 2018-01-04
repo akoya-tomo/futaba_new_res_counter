@@ -1,0 +1,1 @@
+# futaba_new_res_counter
