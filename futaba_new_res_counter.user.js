@@ -4,7 +4,7 @@
 // @description ふたクロでタブに新着レス数を表示する
 // @include     http://*.2chan.net/*/res/*
 // @include     https://*.2chan.net/*/res/*
-// @version     1.0.0
+// @version     1.1.0
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
 // @grant       none
 // @license     MIT
@@ -16,29 +16,32 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 	/*
 	 *	設定
 	 */
-	var USE_BOARD_NAME = true;		//タブに板名を表示する
+	// ==================================================
+	var USE_BOARD_NAME = false;		//タブに板名を表示する
+	// ==================================================
 
 	var script_name = "futaba_new_res_counter";
 	var res = 0;	//新着レス数
-	var serverName = document.domain.match(/^[^.]+/);
-	var boardName = $("#tit").text().match(/^[^＠]+/);
+	var server_name = document.domain.match(/^[^.]+/);
+	var board_name = $("#tit").text().match(/^[^＠]+/);
+	var has_boader_area = false;
 
 	init();
 
 	function init(){
-		if(!isFileNotFound()){
-	        set_title();
-			check_futakuro_reload();
-			check_thread_down();
+		if (!isFileNotFound()) {
+			setTitle();
+			checkFutakuroReload();
+			checkThreadDown();
 		}
-		reset_title();
+		resetTitle();
 	}
 
 	/*
 	 * 404チェック
 	 */
 	function isFileNotFound() {
-		if(document.title == "404 File Not Found") {
+		if (document.title == "404 File Not Found") {
 			return true;
 		}
 		else {
@@ -47,20 +50,27 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 	}
 
 	/*
-	 *ふたクロの新着の状態を取得
+	 * ふたクロの新着の状態を取得
 	 */
-	function check_futakuro_reload() {
-		target = $("#master").parent("form").get(0);
-		config = { childList: true };
+	function checkFutakuroReload() {
+		var target = $(".thre").get(0);
+		var config = { childList: true };
 		var observer = new MutationObserver(function(mutations) {
+			var has_new_res = false;
 			mutations.forEach(function(mutation) {
-				var nodes = $(mutation.addedNodes);
-				//console.log(script_name + ":form nodes =");
-				//console.dir(nodes);
-				if (nodes.length) {
-					change_title();
+				var $nodes = $(mutation.addedNodes);
+				//console.log(script_name + ":added nodes =");
+				//console.dir($nodes);
+				if ($nodes.length) {
+					has_new_res = true;
 				}
 			});
+			if (has_new_res) {
+				changeTitle();
+			}
+			if (!has_boader_area) {
+				checkThreadDown();
+			}
 		});
 		observer.observe(target, config);
 	}
@@ -68,40 +78,42 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 	/*
 	 * タブに新着レス数・スレ消滅状態を表示
 	 */
-	function change_title() {
-		var newres = $(".nb_left:last").text().match(/(\d+)件の新着レス/);	//ふたクロの新着レス数取得
-		if(newres) {
+	function changeTitle() {
+		var newres = $(".nb_left:last").text().match(/(\d+)件の新着レス/);	// ふたクロの新着レス数取得
+		if (newres) {
 			res += parseInt(newres[1]);
 		}
-		if ( res !== 0) {
-			document.title = "(" + res + ")" + title_name();
+		if (res !== 0) {
+			document.title = "(" + res + ")" + titleName();
 		}
 	}
 
 	/*
 	 * ふたクロのステータスからスレ消滅状態をチェック
 	 */
-	function check_thread_down() {
-		target = $("#border_area").get(0);
-		config = { childList: true };
-		var observer = new MutationObserver(function(mutations) {
-			mutations.forEach(function(mutation) {
-				var nodes = $(mutation.addedNodes);
-				//console.log(script_name + ":#border_area nodes =");
-				//console.dir(nodes);
-				if (nodes.attr("id") == "thread_down") {
-					document.title = "#" + title_name();
+	function checkThreadDown() {
+		var target = $("#border_area").get(0);
+		if (target) {
+			setThreadDownObserver(target);
+			has_boader_area = true;
+		}
+
+		function setThreadDownObserver(target) {
+			var config = { childList: true };
+			var observer = new MutationObserver(function() {
+				if ($("#thread_down").length) {
+					document.title = "#" + titleName();
 				}
 			});
-		});
-		observer.observe(target, config);
+			observer.observe(target, config);
+		}
 	}
 
-	function title_name() {
+	function titleName() {
 		var title = document.title;
 		var title_num = title.match(/^(#|\(\d+\))/);
 		var title_num_length;
-		if(!title_num){
+		if (!title_num) {
 			title_num_length = 0;
 		}
 		else {
@@ -114,37 +126,37 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 	/*
 	 * 新着レスをリセット
 	 */
-	function reset_title() {
-		//ページ末尾でホイールダウンした時
+	function resetTitle() {
+		// ページ末尾でホイールダウンした時
 		window.onwheel = function(event){
-			//Windowsで拡大率使用時にwindow_yが小数点以下でずれる対応
+			// Windowsで拡大率使用時にwindow_yが小数点以下でずれる対応
 			var window_y = Math.ceil($(window).height() + $(window).scrollTop());
 			var window_ymax = $(document).height();
 			//console.log(script_name + ": window_y,yamx,deltaY: " + window_y +',' + window_ymax + ',' + event.deltaY);
 			if (event.deltaY > 0 && window_y >= window_ymax ) {
-				reset_titlename();
+				resetTitlename();
 			}
 			return;
 		};
 
-		function reset_titlename() {
+		function resetTitlename() {
 			res = 0;
-			var title_char = title_name();
+			var title_char = titleName();
 			document.title = title_char;
 		}
 	}
 
 	/*
-	 *タイトル設定
+	 * タイトル設定
 	 */
 	// タイトルに板名を追加する
-	function set_title() {
-	  if ( USE_BOARD_NAME ) {
-		if(boardName == "二次元裏"){
-			boardName = serverName;
+	function setTitle() {
+		if (USE_BOARD_NAME) {
+			if (board_name == "二次元裏") {
+				board_name = server_name;
+			}
+			document.title = board_name + " " + document.title;
 		}
-	    document.title = boardName + " " + document.title;
-      }
-    }
+	}
 
 })(jQuery);
