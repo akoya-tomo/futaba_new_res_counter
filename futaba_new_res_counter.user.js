@@ -17,7 +17,7 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 	 *	設定
 	 */
 	// ==================================================
-	var USE_BOARD_NAME = true;		//タブに板名を表示する
+	var USE_BOARD_NAME = false;		//タブに板名を表示する
 	// ==================================================
 
 	var script_name = "futaba_new_res_counter";
