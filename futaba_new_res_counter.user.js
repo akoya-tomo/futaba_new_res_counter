@@ -4,7 +4,7 @@
 // @description ふたクロでタブに新着レス数を表示する
 // @include     http://*.2chan.net/*/res/*
 // @include     https://*.2chan.net/*/res/*
-// @version     1.0.0
+// @version     1.1.0
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
 // @grant       none
 // @license     MIT
